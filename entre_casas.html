@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entre Casas — mochila nómade, sin olvidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#232C3D;
+    --ink-soft:#4B5568;
+    --dawn:#E3E9F0;
+    --sunrise:#F7EFE4;
+    --amber:#E8A24B;
+    --amber-deep:#CE7F2C;
+    --plum:#6E5B87;
+    --bridge:#4F8B7A;
+    --bridge-soft:#DCEAE5;
+    --mist:#8993A1;
+    --card:#FFFFFF;
+    --line:#E4E1D8;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Nunito Sans', sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--dawn) 0%, var(--sunrise) 100%);
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 60px;
+  }
+  .app-shell{ width:100%; max-width:640px; }
+  .brand{ display:flex; align-items:flex-start; gap:12px; margin-bottom:24px; }
+  .brand svg{flex-shrink:0; margin-top:2px;}
+  .brand-text h1{ font-family:'Fraunces', serif; font-weight:600; font-size:27px; margin:0 0 4px; letter-spacing:-0.01em; }
+  .brand-text .tagline{ font-size:13.5px; color:var(--ink-soft); margin:0; line-height:1.4; }
+  .brand-text .tagline strong{color:var(--amber-deep);}
+  .bridge-wrap{ background:var(--card); border-radius:var(--radius); padding:22px 22px 16px; margin-bottom:20px; box-shadow:0 1px 2px rgba(35,44,61,.05), 0 8px 24px -12px rgba(35,44,61,.12); }
+  .bridge-track{ position:relative; height:34px; margin:0 6px 10px; }
+  .bridge-line-bg{ position:absolute; top:16px; left:17px; right:17px; height:3px; background:var(--line); border-radius:2px; }
+  .bridge-line-fill{ position:absolute; top:16px; left:17px; height:3px; background:var(--bridge); border-radius:2px; transition:width .5s ease; }
+  .bridge-end{ position:absolute; top:0; width:34px; height:34px; }
+  .bridge-end.left{left:0;} .bridge-end.right{right:0;}
+  .bridge-marker{ position:absolute; top:8px; width:18px; height:18px; border-radius:50%; background:var(--amber); border:3px solid var(--card); box-shadow:0 0 0 1px var(--line); transition:left .5s ease; }
+  .bridge-labels{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--mist); padding:0 2px; }
+  .bridge-labels span{max-width:64px; text-align:center; line-height:1.3;}
+  .bridge-labels span.active{color:var(--ink); font-weight:600;}
+  .card{ background:var(--card); border-radius:var(--radius); padding:30px 28px 26px; box-shadow:0 1px 2px rgba(35,44,61,.05), 0 8px 24px -12px rgba(35,44,61,.12); }
+  .q-kicker{ font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--plum); margin:0 0 8px; }
+  h2.question{ font-family:'Fraunces', serif; font-weight:500; font-size:22px; line-height:1.28; margin:0 0 6px; }
+  p.subtitle{ color:var(--ink-soft); font-size:14.5px; margin:0 0 20px; line-height:1.5; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .option{ display:flex; align-items:flex-start; gap:12px; text-align:left; border:1.5px solid var(--line); background:#FDFCFA; border-radius:10px; padding:14px 16px; cursor:pointer; font-family:inherit; font-size:14.5px; color:var(--ink); transition:border-color .15s ease, background .15s ease; }
+  .option:hover{border-color:var(--amber); background:#fff;}
+  .option .checkmark{ flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1.5px solid var(--mist); margin-top:1px; position:relative; }
+  .option.multi .checkmark{border-radius:5px;}
+  .option.selected{border-color:var(--bridge); background:var(--bridge-soft);}
+  .option.selected .checkmark{background:var(--bridge); border-color:var(--bridge);}
+  .option.selected .checkmark::after{ content:""; position:absolute; left:5px; top:1px; width:5px; height:9px; border:solid white; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .option strong{display:block; margin-bottom:2px;}
+  .option span.desc{color:var(--ink-soft); font-weight:400; font-size:13px;}
+  .section-label{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--mist); margin:24px 0 10px; }
+  .pill-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{ border:1.5px solid var(--line); background:#FDFCFA; border-radius:20px; padding:8px 16px; font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer; color:var(--ink); }
+  .pill.active{border-color:var(--bridge); background:var(--bridge-soft); color:var(--ink);}
+  .pill.small{padding:7px 13px; font-size:12.5px;}
+  .child-card{ border:1.5px solid var(--line); border-radius:12px; padding:16px 16px 14px; margin-bottom:14px; background:#FDFCFA; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+  .child-card .cc-label{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mist); margin:0 0 8px; }
+  .child-name{ width:100%; font-family:'Fraunces', serif; font-size:17px; padding:10px 12px; border:1.5px solid var(--line); border-radius:8px; outline:none; margin-bottom:2px; }
+  .child-name:focus{border-color:var(--amber);}
+  .fade-block{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); animation:fadeIn .3s ease; }
+  .fade-block .mini-label{font-size:12.5px; color:var(--ink-soft); font-weight:700; margin:0 0 8px;}
+  .upload-btn{ font-family:inherit; font-weight:700; font-size:12.5px; white-space:nowrap; border:1.5px solid var(--line); background:#fff; border-radius:8px; padding:9px 12px; cursor:pointer; color:var(--ink-soft); margin-top:10px; }
+  .upload-btn.done{border-color:var(--bridge); background:var(--bridge-soft); color:var(--bridge);}
+  .switch-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .switch-row div strong{display:block; font-size:14px;}
+  .switch-row div span.desc{font-size:12.5px; color:var(--ink-soft);}
+  .switch{ position:relative; display:inline-block; width:42px; height:24px; flex-shrink:0; }
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{ position:absolute; cursor:pointer; inset:0; background:#D8D4C8; border-radius:24px; transition:.2s; }
+  .slider::before{ content:""; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider{background:var(--bridge);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top:26px; }
+  .btn{ font-family:'Nunito Sans', sans-serif; font-weight:700; font-size:14.5px; border-radius:9px; padding:11px 22px; cursor:pointer; border:none; transition:transform .1s ease, opacity .15s ease; }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--ink); color:#fff;}
+  .btn-primary:disabled{opacity:.35; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); padding:11px 8px;}
+  .btn-ghost:hover{color:var(--ink);}
+  .hint{font-size:12.5px; color:var(--mist); margin-top:14px;}
+  .result-head{margin-bottom:6px;}
+  .result-head .q-kicker{color:var(--bridge);}
+  .result-head h2{font-family:'Fraunces', serif; font-size:24px; font-weight:600; margin:0 0 8px;}
+  .result-head p{color:var(--ink-soft); font-size:14.5px; line-height:1.55; margin:0;}
+  .result-head p strong{color:var(--ink);}
+  .config-note{ background:var(--bridge-soft); border-radius:10px; padding:14px 16px; font-size:13.5px; line-height:1.55; color:var(--ink); margin-top:10px; }
+  .shared-list{display:flex; flex-direction:column; gap:8px;}
+  .shared-event{ display:flex; align-items:center; gap:10px; background:#FBFAF8; border:1px solid var(--line); border-radius:10px; padding:11px 14px; font-size:13.5px; }
+  .shared-event .lock{flex-shrink:0; font-size:15px;}
+  .shared-event b{font-weight:700;}
+  .shared-event .who{margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--mist);}
+  .child-block{margin-top:8px; border-top:1px dashed var(--line); padding-top:18px;}
+  .child-block h3{font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 4px;}
+  .child-block .who-line{font-size:12.5px; color:var(--ink-soft); margin:0 0 10px;}
+  .week{ display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; }
+  .day{ flex:1 0 78px; background:#FBFAF8; border:1px solid var(--line); border-radius:10px; padding:9px 8px 10px; min-height:110px; display:flex; flex-direction:column; }
+  .day .dname{font-weight:800; font-size:12px; margin-bottom:4px;}
+  .house-tag{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; padding:2px 6px; border-radius:5px; display:inline-block; margin-bottom:6px; width:fit-content; }
+  .house-a{background:#EFE6F5; color:var(--plum);}
+  .house-b{background:#FFF0DD; color:var(--amber-deep);}
+  .day .chip{ font-size:11px; line-height:1.3; background:#fff; border:1px solid var(--line); border-radius:6px; padding:5px 6px; margin-bottom:5px; cursor:pointer; display:flex; align-items:flex-start; gap:5px; }
+  .day .chip .box{ flex-shrink:0; width:12px; height:12px; border:1.3px solid var(--mist); border-radius:3px; margin-top:1px; }
+  .day .chip.done{opacity:.45;}
+  .day .chip.done .txt{text-decoration:line-through;}
+  .day .chip.done .box{background:var(--bridge); border-color:var(--bridge);}
+  .add-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .add-row select, .add-row input{ font-family:inherit; font-size:13.5px; padding:10px 12px; border:1.5px solid var(--line); border-radius:8px; outline:none; }
+  .add-row input{flex:1 1 200px;}
+  .add-row select{flex:0 0 auto;}
+  .add-row input:focus, .add-row select:focus{border-color:var(--amber);}
+  .add-row button{ background:var(--bridge); color:#fff; border:none; border-radius:8px; padding:0 16px; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .phone-mock{ background:var(--ink); color:#fff; border-radius:14px; padding:14px 16px; display:flex; gap:11px; align-items:flex-start; max-width:420px; }
+  .phone-mock .icon-bubble{ background:var(--amber); color:var(--ink); width:30px; height:30px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+  .phone-mock .body b{display:block; font-size:13px; margin-bottom:2px;}
+  .phone-mock .body span{font-size:12.5px; opacity:.85; line-height:1.4;}
+  .phone-mock .time{font-family:'IBM Plex Mono', monospace; font-size:10.5px; opacity:.55; margin-left:auto; flex-shrink:0;}
+  .muted-note{font-size:13px; color:var(--mist); font-style:italic;}
+  .summary-card{ border:1.5px dashed var(--line); border-radius:10px; padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .summary-card .left b{display:block; font-size:14.5px; margin-bottom:3px;}
+  .summary-card .left span{font-size:12.5px; color:var(--ink-soft);}
+  .summary-card button{ background:transparent; border:1.5px solid var(--ink); color:var(--ink); border-radius:8px; padding:9px 14px; font-weight:700; font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .closing{ margin-top:28px; padding-top:18px; border-top:1px solid var(--line); font-family:'Fraunces', serif; font-size:17px; font-style:italic; color:var(--ink-soft); line-height:1.5; text-align:center; }
+  .restart-row{margin-top:22px; text-align:center;}
+  .restart-row button{ background:transparent; border:none; color:var(--mist); font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline; }
+  @media (max-width:480px){ .card{padding:24px 18px 22px;} .brand-text h1{font-size:23px;} }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M4 26 L4 16 L9 11 L14 16 L14 26" stroke="#6E5B87" stroke-width="2" stroke-linejoin="round" fill="#EFE6F5"/>
+      <path d="M26 26 L26 16 L31 11 L36 16 L36 26" stroke="#CE7F2C" stroke-width="2" stroke-linejoin="round" fill="#FFF0DD"/>
+      <path d="M13 22 Q20 14 27 22" stroke="#4F8B7A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="19.5" r="2.4" fill="#4F8B7A"/>
+    </svg>
+    <div class="brand-text">
+      <h1>Entre Casas</h1>
+      <p class="tagline"><strong>Mochila nómade;</strong> sin olvidos, organización semanal para no fallar!</p>
+    </div>
+  </div>
+
+  <div class="bridge-wrap">
+    <div class="bridge-track">
+      <div class="bridge-line-bg"></div>
+      <div class="bridge-line-fill" id="lineFill"></div>
+      <div class="bridge-end left"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M4 24 L4 13 L17 3 L30 13 L30 24 Z" fill="#EFE6F5" stroke="#6E5B87" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="bridge-end right"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M4 24 L4 13 L17 3 L30 13 L30 24 Z" fill="#FFF0DD" stroke="#CE7F2C" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="bridge-marker" id="marker"></div>
+    </div>
+    <div class="bridge-labels" id="labels"></div>
+  </div>
+
+  <div class="card" id="card"></div>
+
+</div>
+
+<script>
+const AGE_OPTS = [
+  {value:'v0_7', label:'0 a 7 años'},
+  {value:'v8_12', label:'8 a 12 años'},
+  {value:'v13_16', label:'13 a 16 años'},
+  {value:'solo', label:'Más de 16 / autónomo'}
+];
+const CARGA_OPTS_BASE = [
+  {value:'mama', label:'Mamá'},
+  {value:'papa', label:'Papá'},
+  {value:'ambos', label:'Ambos'}
+];
+
+const steps = [
+  {
+    id:'relacion', kicker:'Paso 1 de 3', label:'Cómo se organizan',
+    question:()=> '¿Cómo es hoy la comunicación entre las dos casas?',
+    subtitle:()=> `No hay respuesta incorrecta: Entre Casas se adapta a la relación que tengan hoy, pensando siempre en el bienestar de ${nameList()}.`,
+    type:'single',
+    options:[
+      {value:'buena', title:'Fluida', desc:'Ambos padres pueden cargar y ver el calendario juntos.'},
+      {value:'limitada', title:'Limitada o tensa', desc:'Mejor que cada uno cargue lo suyo, sin cruzarse.'},
+      {value:'individual', title:'Solo yo la voy a usar', desc:'Por ahora organizo mi mitad, y eso ya ayuda.'}
+    ]
+  },
+  {
+    id:'prioridades', kicker:'Paso 2 de 3', label:'Qué no puede faltar',
+    question:()=> '¿Qué es lo que más se suele quedar en "la otra casa"?',
+    subtitle:()=> `Elegí todas las que apliquen. Con esto armamos la semana de ejemplo de ${nameList()}.`,
+    type:'multi',
+    options:[
+      {value:'ropa', title:'Ropa y uniformes', desc:'Buzos, camperas, el que está sin lavar.'},
+      {value:'utiles', title:'Útiles y deberes', desc:'Carpetas, libros, tareas para entregar.'},
+      {value:'deporte_arte', title:'Deporte o arte', desc:'Botines, palo de hockey, instrumento musical.'},
+      {value:'eventos', title:'Cumpleaños y regalos', desc:'Regalo grupal, merienda compartida, disfraz.'},
+      {value:'salud', title:'Salud', desc:'Medicación, controles, turnos, terapias.'},
+      {value:'todo', title:'Todo', desc:'Para familias y chicos más distraídos: mejor prevenir todo el combo.'}
+    ]
+  },
+  {
+    id:'avisos', kicker:'Paso 3 de 3', label:'Cómo avisamos',
+    question:()=> '¿Cómo preferís recibir los recordatorios?',
+    subtitle:()=> `Para que nunca haya una sorpresa a las 7 de la mañana con lo de ${nameList()}.`,
+    type:'single',
+    options:[
+      {value:'diario', title:'Aviso diario a las 17 hs', desc:'Un mensaje puntual con lo que hace falta para el día siguiente.'},
+      {value:'domingo', title:'Resumen del domingo', desc:'Documento imprimible los domingos por la tarde con toda la semana.'},
+      {value:'ambos', title:'Los dos', desc:'Aviso diario a las 17 hs + panorama completo los domingos.'}
+    ]
+  }
+];
+
+const state = {
+  step:0,
+  setup:{ cantidadHijos:null, hijos:[], recordatorioDomingo:true, recordatorioDiario:true },
+  answers:{ relacion:null, prioridades:[], avisos:null }
+};
+
+const cardEl = document.getElementById('card');
+const labelsEl = document.getElementById('labels');
+const lineFillEl = document.getElementById('lineFill');
+const markerEl = document.getElementById('marker');
+
+const nodeLabels = ['Tu familia', ...steps.map(s=>s.label), 'Tu puente'];
+
+function renderBridge(){
+  const total = nodeLabels.length - 1;
+  const pct = (state.step/total)*100;
+  lineFillEl.style.width = `${pct}%`;
+  markerEl.style.left = `calc(17px + (100% - 34px) * ${state.step/total})`;
+  labelsEl.innerHTML = nodeLabels.map((l,i)=>`<span class="${i===state.step?'active':''}">${l}</span>`).join('');
+}
+
+/* ---------------- Helpers de nombres ---------------- */
+function names(){
+  return state.setup.hijos.map((h,i)=> h.nombre && h.nombre.trim() ? h.nombre.trim() : `Hijo/a ${i+1}`);
+}
+function nameList(){
+  const arr = names();
+  if(arr.length===0) return 'tu familia';
+  if(arr.length===1) return arr[0];
+  if(arr.length===2) return arr.join(' y ');
+  return arr.slice(0,-1).join(', ') + ' y ' + arr[arr.length-1];
+}
+
+/* ---------------- Setup screen (fluidez ascendente) ---------------- */
+function renderSetup(){
+  const s = state.setup;
+  const pillVals = ['1','2','3','4+'];
+  const pillHtml = pillVals.map(v=>`<button class="pill ${s.cantidadHijos===v?'active':''}" data-cant="${v}">${v} hijo${v==='1'?'':'s'}</button>`).join('');
+
+  let hijosHtml = '';
+  if(s.cantidadHijos){
+    hijosHtml = s.hijos.map((h,i)=>{
+      const showEdad = h.nombre && h.nombre.trim().length>0;
+      const showCarga = showEdad && h.edad;
+      const cargaOpts = [...CARGA_OPTS_BASE];
+      if(h.edad==='v13_16' || h.edad==='solo'){
+        cargaOpts.push({value:'propio', label:`${h.nombre.trim()} ya puede solo/a`});
+      }
+      const edadPills = AGE_OPTS.map(o=>`<button class="pill small ${h.edad===o.value?'active':''}" data-hijo="${i}" data-edad="${o.value}">${o.label}</button>`).join('');
+      const cargaPills = cargaOpts.map(o=>`<button class="pill small ${h.cargaQuien===o.value?'active':''}" data-hijo="${i}" data-carga="${o.value}">${o.label}</button>`).join('');
+      return `
+      <div class="child-card">
+        <p class="cc-label">Hijo/a ${i+1}</p>
+        <input type="text" class="child-name" data-idx="${i}" value="${h.nombre}" placeholder="¿Cómo se llama?">
+        ${showEdad ? `
+        <div class="fade-block">
+          <p class="mini-label">¿Qué edad tiene ${h.nombre.trim()}?</p>
+          <div class="pill-row">${edadPills}</div>
+        </div>` : ''}
+        ${showCarga ? `
+        <div class="fade-block">
+          <p class="mini-label">¿Quién carga la información de ${h.nombre.trim()}?</p>
+          <div class="pill-row">${cargaPills}</div>
+          <button class="upload-btn ${h.calendarioCargado?'done':''}" data-uidx="${i}">${h.calendarioCargado?`✓ Horario de ${h.nombre.trim()} cargado`:'📎 Subir horario fijo semanal'}</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const allComplete = s.cantidadHijos && s.hijos.length>0 && s.hijos.every(h=> h.nombre.trim() && h.edad && h.cargaQuien);
+
+  cardEl.innerHTML = `
+    <p class="q-kicker">Configuración inicial</p>
+    <h2 class="question">Antes de arrancar, armemos tu familia</h2>
+    <p class="subtitle">Esto se configura una sola vez. Después se puede editar cuando quieran.</p>
+
+    <p class="section-label" style="margin-top:0">¿Cuántos hijos van a registrar?</p>
+    <div class="pill-row">${pillHtml}</div>
+
+    ${hijosHtml}
+
+    ${allComplete ? `
+    <p class="section-label">Recordatorios automáticos</p>
+    <div class="switch-row">
+      <label class="switch"><input type="checkbox" id="swDomingo" ${s.recordatorioDomingo?'checked':''}><span class="slider"></span></label>
+      <div><strong>Resumen semanal</strong><span class="desc">Domingos por la tarde, con toda la semana.</span></div>
+    </div>
+    <div class="switch-row">
+      <label class="switch"><input type="checkbox" id="swDiario" ${s.recordatorioDiario?'checked':''}><span class="slider"></span></label>
+      <div><strong>Aviso diario</strong><span class="desc">A las 17 hs, con lo que hace falta para el día siguiente.</span></div>
+    </div>` : ''}
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" style="visibility:hidden">← Atrás</button>
+      <button class="btn btn-primary" id="nextBtn" ${allComplete ? '' : 'disabled'}>Continuar →</button>
+    </div>
+  `;
+
+  cardEl.querySelectorAll('[data-cant]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const v = btn.dataset.cant;
+      s.cantidadHijos = v;
+      const count = v==='4+' ? 4 : parseInt(v);
+      const newHijos = [];
+      for(let i=0;i<count;i++){
+        newHijos.push(s.hijos[i] || {nombre:'', edad:null, cargaQuien:null, calendarioCargado:false});
+      }
+      s.hijos = newHijos;
+      renderSetup();
+    });
+  });
+  cardEl.querySelectorAll('.child-name').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      s.hijos[inp.dataset.idx].nombre = inp.value;
+      renderSetup();
+      // keep focus on the same field after re-render
+      const again = cardEl.querySelector(`.child-name[data-idx="${inp.dataset.idx}"]`);
+      if(again){ again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+    });
+  });
+  cardEl.querySelectorAll('[data-edad]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = btn.dataset.hijo;
+      s.hijos[i].edad = btn.dataset.edad;
+      if(s.hijos[i].cargaQuien==='propio' && !(btn.dataset.edad==='v13_16'||btn.dataset.edad==='solo')){
+        s.hijos[i].cargaQuien = null;
+      }
+      renderSetup();
+    });
+  });
+  cardEl.querySelectorAll('[data-carga]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = btn.dataset.hijo;
+      s.hijos[i].cargaQuien = btn.dataset.carga;
+      renderSetup();
+    });
+  });
+  cardEl.querySelectorAll('.upload-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ const i = btn.dataset.uidx; s.hijos[i].calendarioCargado = !s.hijos[i].calendarioCargado; renderSetup(); });
+  });
+  const swD = document.getElementById('swDomingo');
+  if(swD) swD.addEventListener('change', ()=> s.recordatorioDomingo = swD.checked);
+  const swDi = document.getElementById('swDiario');
+  if(swDi) swDi.addEventListener('change', ()=> s.recordatorioDiario = swDi.checked);
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.addEventListener('click', ()=>{ if(!allComplete) return; state.step++; render(); });
+}
+
+/* ---------------- Question screens ---------------- */
+function isAnswered(step){
+  const a = state.answers[step.id];
+  if(step.type==='multi') return a && a.length>0;
+  return !!a;
+}
+function toggleOption(step, value){
+  if(step.type==='multi'){
+    const arr = state.answers[step.id];
+    const idx = arr.indexOf(value);
+    if(idx>-1) arr.splice(idx,1); else arr.push(value);
+  } else { state.answers[step.id] = value; }
+  render();
+}
+function renderQuestion(step){
+  const selected = state.answers[step.id];
+  const optsHtml = step.options.map(o=>{
+    const isSel = step.type==='multi' ? selected.includes(o.value) : selected===o.value;
+    return `<button class="option ${step.type==='multi'?'multi':''} ${isSel?'selected':''}" data-value="${o.value}">
+      <span class="checkmark"></span>
+      <span><strong>${o.title}</strong><span class="desc">${o.desc}</span></span>
+    </button>`;
+  }).join('');
+
+  cardEl.innerHTML = `
+    <p class="q-kicker">${step.kicker}</p>
+    <h2 class="question">${step.question()}</h2>
+    <p class="subtitle">${step.subtitle()}</p>
+    <div class="options">${optsHtml}</div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="backBtn">← Atrás</button>
+      <button class="btn btn-primary" id="nextBtn" ${isAnswered(step)?'':'disabled'}>Continuar →</button>
+    </div>
+  `;
+  cardEl.querySelectorAll('.option').forEach(btn=>{
+    btn.addEventListener('click', ()=> toggleOption(step, btn.dataset.value));
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(!isAnswered(step)) return;
+    state.step++; render();
+  });
+  document.getElementById('backBtn').addEventListener('click', ()=>{ state.step--; render(); });
+}
+
+/* ---------------- Resultado ---------------- */
+const priorityItems = {
+  ropa:{day:2, txt:'Buzo de gimnasia (mañana toca clase)'},
+  utiles:{day:0, txt:'Carpeta de Historia + tarea para entregar'},
+  deporte_arte:{day:1, txt:'Botines de fútbol (entrena a las 17 hs)'},
+  eventos:{day:4, txt:'Regalo cumpleaños de Fede (grupal, aportar $)'},
+  salud:{day:3, txt:'Pastillas control + llevar receta'}
+};
+const dayNames = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const sharedEvents = [
+  {txt:'Cumpleaños de la abuela', when:'Sábado', who:'Toda la familia'},
+  {txt:'Campamento escolar', when:'14 al 16', who:'Solo informativo'},
+  {txt:'Asado familiar', when:'Domingo mediodía', who:'Toda la familia'}
+];
+const CARGA_LABELS = {mama:'Mamá', papa:'Papá', ambos:'Mamá y Papá', propio:null};
+
+let extraReminders = {}; // key `${hijoIdx}-${dayIdx}` -> array de strings
+
+function relacionCopy(v){
+  return {
+    buena:'vas a compartir el calendario entre los dos: cualquiera de los dos puede cargar y marcar como resuelto, sin necesidad de avisar al otro por otro medio.',
+    limitada:'cada uno va a ver y cargar su propia mitad. No hay edición cruzada: así evitamos que un recordatorio borrado se convierta en una nueva discusión.',
+    individual:'la vas a usar vos, en modo individual. Igual sirve: ordenás tu mitad del problema y llega más tranquilidad a las dos casas.'
+  }[v];
+}
+function edadCopy(edad, nombre){
+  return {
+    v0_7:`Como ${nombre} todavía es chico/a (0 a 7 años), los recordatorios llegan a los padres, que cargan y gestionan todo.`,
+    v8_12:`Entre 8 y 12 años, ${nombre} puede empezar a avisar cosas puntuales ("me olvidé el buzo"), pero la carga del calendario y la decisión final siguen siendo de los padres.`,
+    v13_16:`Entre 13 y 16 años, ${nombre} puede empezar a manejar su propia lista, con acompañamiento. Ideal para practicar autonomía con red de contención.`,
+    solo:`${nombre} ya maneja la herramienta por sí mismo/a. Los padres pueden quedar en modo consulta, solo para lo importante.`
+  }[edad];
+}
+function avisosCopy(v){
+  return {
+    diario:'Vas a recibir un aviso puntual a las 17 hs con lo que hace falta para el día siguiente.',
+    domingo:'Vas a recibir un documento imprimible cada domingo por la tarde con el panorama completo de la semana.',
+    ambos:'Vas a recibir el aviso diario a las 17 hs y, además, el resumen completo cada domingo por la tarde.'
+  }[v];
+}
+function cargaTexto(h){
+  if(h.cargaQuien==='propio') return `${h.nombre.trim()} ya carga su propia información`;
+  return `la información de ${h.nombre.trim()} la carga ${CARGA_LABELS[h.cargaQuien]}`;
+}
+
+function buildWeek(hijoIdx){
+  let chosen = state.answers.prioridades;
+  if(chosen.includes('todo')) chosen = Object.keys(priorityItems);
+  const dayItems = {};
+  chosen.forEach(p=>{
+    const item = priorityItems[p];
+    if(!item) return;
+    if(!dayItems[item.day]) dayItems[item.day]=[];
+    dayItems[item.day].push(item.txt);
+  });
+  const houseByDay = hijoIdx % 2 === 0
+    ? ['A','A','A','B','B','X','X']
+    : ['B','A','A','A','B','X','X'];
+  return dayNames.map((name,i)=>{
+    const house = houseByDay[i];
+    const houseLabel = house==='A' ? 'Casa A' : house==='B' ? 'Casa B' : 'Fin de semana';
+    const houseClass = house==='A' ? 'house-a' : 'house-b';
+    const items = (dayItems[i]||[]).concat(extraReminders[`${hijoIdx}-${i}`]||[]);
+    const chips = items.map(txt=>`<div class="chip"><span class="box"></span><span class="txt">${txt}</span></div>`).join('');
+    return `<div class="day">
+      <div class="dname">${name}</div>
+      <div class="house-tag ${houseClass}">${houseLabel}</div>
+      ${chips}
+    </div>`;
+  }).join('');
+}
+
+function renderResultado(){
+  const a = state.answers;
+  const s = state.setup;
+
+  const sharedHtml = sharedEvents.map(e=>`
+    <div class="shared-event"><span class="lock">🔒</span><span><b>${e.txt}</b> — ${e.when}</span><span class="who">${e.who}</span></div>
+  `).join('');
+
+  const childBlocks = s.hijos.map((h,i)=>{
+    const nombre = h.nombre.trim();
+    return `
+    <div class="child-block">
+      <h3>Semana de ${nombre}</h3>
+      <p class="who-line">${cargaTexto(h)} · ${edadCopy(h.edad, nombre)}</p>
+      <div class="week" id="week-${i}">${buildWeek(i)}</div>
+    </div>`;
+  }).join('');
+
+  const childOptions = s.hijos.map((h,i)=>`<option value="${i}">${h.nombre.trim()}</option>`).join('');
+
+  cardEl.innerHTML = `
+    <div class="result-head">
+      <p class="q-kicker">Tu puente, armado</p>
+      <h2>Así quedaría configurado para ${nameList()}</h2>
+      <p>En modo <strong>${a.relacion==='buena'?'compartido':a.relacion==='limitada'?'individual sin cruce':'individual'}</strong>, ${relacionCopy(a.relacion)}</p>
+    </div>
+
+    <p class="section-label">Eventos en conjunto (toda la familia)</p>
+    <div class="shared-list">${sharedHtml}</div>
+    <p class="hint">Este listado es común a todos los hijos y solo informativo: nadie puede agendar otra cosa encima, para evitar roces.</p>
+
+    ${childBlocks}
+
+    <div class="add-row">
+      ${s.hijos.length>1 ? `<select id="childSelect">${childOptions}</select>` : `<input type="hidden" id="childSelect" value="0">`}
+      <input type="text" id="addInput" placeholder="Agregá algo que hoy se te ocurra que puede faltar…" />
+      <button id="addBtn">Agregar a Lunes</button>
+    </div>
+    <p class="hint">Así carga alguien algo tipo "me olvidé el buzo en lo de papá": queda como recordatorio individual hasta marcarlo como resuelto.</p>
+
+    <p class="section-label">Cómo llegan los avisos</p>
+    ${s.recordatorioDiario ? `
+    <div class="phone-mock">
+      <div class="icon-bubble">🌙</div>
+      <div class="body"><b>Entre Casas</b><span>${avisosCopy(a.avisos)}</span></div>
+      <div class="time">17:00</div>
+    </div>` : `<p class="muted-note">Aviso diario desactivado en la configuración inicial.</p>`}
+
+    ${s.recordatorioDomingo ? `
+    <div class="summary-card" style="margin-top:12px;">
+      <div class="left"><b>Semana del 20 al 26</b><span>${s.hijos.length} hijo${s.hijos.length>1?'s':''} · eventos en conjunto incluidos · listo para imprimir o compartir</span></div>
+      <button id="printBtn">Vista previa</button>
+    </div>` : `<p class="muted-note">Resumen semanal desactivado en la configuración inicial.</p>`}
+
+    <p class="closing">Porque crecer entre dos casas ya es un desafío. Que organizarse no sea otro más.</p>
+
+    <div class="restart-row"><button id="restartBtn">Volver a empezar el cuestionario</button></div>
+  `;
+
+  cardEl.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=> chip.classList.toggle('done'));
+  });
+  const addBtn = document.getElementById('addBtn');
+  if(addBtn) addBtn.addEventListener('click', addReminder);
+  const addInput = document.getElementById('addInput');
+  if(addInput) addInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addReminder(); });
+  const printBtn = document.getElementById('printBtn');
+  if(printBtn) printBtn.addEventListener('click', ()=> window.print());
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    state.step = 0;
+    state.setup = { cantidadHijos:null, hijos:[], recordatorioDomingo:true, recordatorioDiario:true };
+    state.answers = { relacion:null, prioridades:[], avisos:null };
+    extraReminders = {};
+    render();
+  });
+}
+
+function addReminder(){
+  const input = document.getElementById('addInput');
+  const childSelect = document.getElementById('childSelect');
+  const val = input.value.trim();
+  if(!val) return;
+  const hijoIdx = childSelect ? parseInt(childSelect.value) : 0;
+  const key = `${hijoIdx}-0`; // demo: se agrega siempre a "Lunes" como referencia de "hoy"
+  if(!extraReminders[key]) extraReminders[key]=[];
+  extraReminders[key].push(val);
+  input.value='';
+  const weekEl = document.getElementById(`week-${hijoIdx}`);
+  if(weekEl){
+    weekEl.innerHTML = buildWeek(hijoIdx);
+    weekEl.querySelectorAll('.chip').forEach(chip=>{ chip.addEventListener('click', ()=> chip.classList.toggle('done')); });
+  }
+}
+
+function render(){
+  renderBridge();
+  if(state.step===0) renderSetup();
+  else if(state.step>=1 && state.step<=steps.length) renderQuestion(steps[state.step-1]);
+  else renderResultado();
+}
+
+render();
+</script>
+</body>
+</html>
